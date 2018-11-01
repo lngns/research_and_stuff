@@ -46,6 +46,6 @@ Threading commands:
 
 Basic primitives to manipulate a block's code:  
 - `<block> <index> get_inst` pushes the literal word from a block's index; `{4 5 +} 2 get_inst .` => `+`  
-- `<block> <index> <value> set_inst` alters a block; `{15 10 +} 2 set_inst "-" call .` => `5`  
+- `<block> <index> <value> set_inst` alters a block; `{15 10 +} 2 "-" set_inst call .` => `5`  
 
 Other stuff to do may be: shared variables, atomicity, messaging, a proper scheduling _for_ JS.
