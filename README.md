@@ -50,9 +50,9 @@ Basic primitives to manipulate a block's code:
 
 Other stuff to do may be: shared variables, atomicity, messaging, a proper scheduling _for_ JS.
 
-# xmlConstruct
+# XmlConstruct
 
-**xmlconstruct.d** is a D factory constructing objects from a XML document.  
+**xmlconstructor.d** is a D factory constructing objects from a XML document.  
 It is 100% compile-time as it uses D reflection, and requires `arsd.dom`[1].  
 The pattern is based on Skew's approach to XML construction[2], with XML attributes initializing fields, and child nodes being constructed and passed to `opXml` (following D style instead of Skew <>...</>).
 
@@ -92,5 +92,5 @@ int main()
 ```
 
 
-[1] https://github.com/adamdruppe/arsd
-[2] http://skew-lang.org/
+[1] https://github.com/adamdruppe/arsd  
+[2] http://skew-lang.org/  
