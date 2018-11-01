@@ -49,3 +49,48 @@ Basic primitives to manipulate a block's code:
 - `<block> <index> <value> set_inst` alters a block; `{15 10 +} 2 "-" set_inst call .` => `5`  
 
 Other stuff to do may be: shared variables, atomicity, messaging, a proper scheduling _for_ JS.
+
+# xmlConstruct
+
+**xmlconstruct.d** is a D factory constructing objects from a XML document.  
+It is 100% compile-time as it uses D reflection, and requires `arsd.dom`[1].  
+The pattern is based on Skew's approach to XML construction[2], with XML attributes initializing fields, and child nodes being constructed and passed to `opXml` (following D style instead of Skew <>...</>).
+
+As such, one can do this:
+```d
+import xmlconstructor;
+mixin mixinXmlConstructor;
+
+struct Foo
+{
+private:
+    Baz[] elems;
+
+public:
+    int val;
+    
+    void opXml(Baz elem)
+    {
+        elems ~= elem;
+    }
+}
+struct Baz
+{
+    string name;
+}
+
+int main()
+{
+    auto obj = xmlConstruct!q{
+        <Foo val="42">
+            <Baz name="Moskva" />
+            <Baz name="Copenhagen" />
+        </Foo>
+    };
+    return 1;
+}
+```
+
+
+[1] https://github.com/adamdruppe/arsd
+[2] http://skew-lang.org/
