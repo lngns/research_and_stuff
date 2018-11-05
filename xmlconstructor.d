@@ -5,23 +5,22 @@ mixin template mixinXmlConstruct()
     import arsd.dom;
     import std.traits;
 
-    auto xmlConstruct(string source, string[string] aliases = null)()
+    auto xmlConstruct(string source)()
     {
-        //We can't have class instances in enums and other static stuff, yet we can have them as part of their init-expressions
-        //So I'm parsing the code 36 thousand times just because I can't keep my XmlDocument somewhere
-        //sad
-        static if(new XmlDocument(source).root.tagName == "d:template")
-            mixin("alias typename = " ~ new XmlDocument(source).root.attributes["d:type"] ~ ";");
-        else static if(new XmlDocument(source).root.tagName in aliases)
-            mixin("alias typename = " ~ aliases[new XmlDocument(source).root.tagName] ~ ";");
+        //triggers some error I don't get
+        //static const Doc = new XmlDocument(source);
+        enum tagName = new XmlDocument(source).root.tagName;
+        enum attributes = new XmlDocument(source).root.attributes;
+        static if(tagName == "d:template")
+            mixin("alias typename = " ~ attributes["d:type"] ~ ";");
         else
-            mixin("alias typename = " ~ new XmlDocument(source).root.tagName ~ ";");
+            mixin("alias typename = " ~ tagName ~ ";");
         static if(is(typename == class))
             typename obj = new typename;
         else
             typename obj;
 
-        static foreach(attr, value; new XmlDocument(source).root.attributes)
+        static foreach(attr, value; attributes)
         {
             static if(hasMember!(typename, attr))
             {
@@ -43,7 +42,7 @@ mixin template mixinXmlConstruct()
             {
                 static if(new XmlDocument(source).root.childNodes[i].tagName[0] != '#')
                 {
-                    obj.opXml(xmlConstruct!(new XmlDocument(source).root.childNodes[i].toString(), aliases));
+                    obj.opXml(xmlConstruct!(new XmlDocument(source).root.childNodes[i].toString()));
                 }
             }
         }
