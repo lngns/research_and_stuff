@@ -7,20 +7,37 @@ mixin template mixinXmlConstruct()
 
     auto xmlConstruct(string source)()
     {
-        //triggers some error I don't get
-        //static const Doc = new XmlDocument(source);
-        enum tagName = new XmlDocument(source).root.tagName;
-        enum attributes = new XmlDocument(source).root.attributes;
-        static if(tagName == "d:template")
-            mixin("alias typename = " ~ attributes["d:type"] ~ ";");
+        static class DClassEnumDelegate
+        {
+            XmlDocument doc;
+
+            this()
+            {
+                doc = new XmlDocument(source);
+            }
+            const(XmlDocument) getDoc() const
+            {
+                return doc;
+            }
+        }
+        //ok so we cannot store a class instance as a manifest constant with "enum"
+        //and "static const" triggers an error with XmlDocument anyway
+        //(arsd.dom is not compatible with it maybe?)
+        //but there is a bug allowing delegates with class as contexts to be manifest constants!
+        //so here you have it; Doc's context is a class. Also note the bug allows the function to mutates its context
+        //so I marked getDoc() const for it not to be confusing.
+        enum Doc = &(new DClassEnumDelegate().getDoc);
+
+        static if(Doc().root.tagName == "d:template")
+            mixin("alias typename = " ~ Doc().root.attributes["d:type"] ~ ";");
         else
-            mixin("alias typename = " ~ tagName ~ ";");
+            mixin("alias typename = " ~ Doc().root.tagName ~ ";");
         static if(is(typename == class))
             typename obj = new typename;
         else
             typename obj;
 
-        static foreach(attr, value; attributes)
+        static foreach(attr, value; Doc().root.attributes)
         {
             static if(hasMember!(typename, attr))
             {
@@ -37,12 +54,12 @@ mixin template mixinXmlConstruct()
         }
         static if(hasMember!(typename, "opXml") && isFunction!(typename.opXml) && is(ReturnType!(typeof(&typename.opXml)) == void))
         {
-            enum length = new XmlDocument(source).root.childNodes.length;
+            enum length = Doc().root.childNodes.length;
             static foreach(i; 0..length)
             {
-                static if(new XmlDocument(source).root.childNodes[i].tagName[0] != '#')
+                static if(Doc().root.childNodes[i].tagName[0] != '#')
                 {
-                    obj.opXml(xmlConstruct!(new XmlDocument(source).root.childNodes[i].toString()));
+                    obj.opXml(xmlConstruct!(Doc().root.childNodes[i].toString()));
                 }
             }
         }
