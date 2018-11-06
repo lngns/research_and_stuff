@@ -59,7 +59,7 @@ The pattern is based on Skew's approach to XML construction[2], with XML attribu
 As such, one can do this:
 ```d
 import xmlconstructor;
-mixin mixinXmlConstructor;
+mixin mixinXmlConstruct;
 
 struct Foo
 {
